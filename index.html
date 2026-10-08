@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Générateur LETEC</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{--yellow:#ffd200;--yellow-soft:#fff6c7;--ink:#242b33;--red:#d92d20;--red-soft:#fdecea}
+@font-face{font-family:'Arial Black';src:local('Arial Black'),local('Arial-Black')}
+*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;background:#eceef2;margin:0;padding:24px;display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start;justify-content:center}
+#navigation{width:360px;display:flex;gap:8px;margin-bottom:-20px}.nav-button{flex:1;padding:12px 8px;border:none;border-radius:10px;background:#d7d9de;color:var(--ink);font-family:'Arial Black',Arial,sans-serif;font-size:13px;cursor:pointer}.nav-button.active{background:var(--yellow)}
+#panel{width:360px;background:#fff;border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,.08);border-top:5px solid var(--yellow)}#panel h2{font-size:16px;margin-top:0;color:var(--ink)}#panel label{display:block;font-size:12px;font-weight:bold;margin:14px 0 4px;color:var(--ink)}
+#panel input[type=text],#panel input[type=date],#panel input[type=file],#panel select,#panel textarea{width:100%;padding:7px 9px;border:1px solid #ccd0d6;border-radius:8px;font-family:Arial,sans-serif;font-size:13px}#panel input:focus,#panel select:focus,#panel textarea:focus{outline:2px solid var(--yellow);border-color:var(--ink)}#panel textarea{resize:vertical;min-height:70px}
+#panel .radio-row{display:flex;gap:12px;font-size:12px;flex-wrap:wrap}#panel .radio-row label{display:flex;align-items:center;gap:4px;font-weight:normal;margin:0}
+#panel .date-range{display:none;gap:8px}.date-range.active{display:flex!important}.date-single{display:none}.date-single.active{display:block}.date-two{display:none;gap:8px}.date-two.active{display:flex!important}
+#panel button{margin-top:20px;width:100%;padding:12px;background:var(--yellow);color:var(--ink);border:none;border-radius:8px;font-family:'Arial Black',Arial,sans-serif;font-size:14px;cursor:pointer}#panel button:hover{filter:brightness(.94)}#panel button:disabled{opacity:.7;cursor:wait}#panel .hint{font-size:11px;color:#777;margin-top:4px}#panel hr{border:none;border-top:1px solid #eee;margin:18px 0}
+#panel .add-row{display:flex;gap:8px}#panel .add-row button{margin:0;width:auto;padding:0 16px}#lineChips,#infoLineChips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.chip{display:inline-flex;align-items:center;gap:4px;background:var(--ink);color:var(--yellow);font-weight:bold;font-size:13px;padding:4px 6px 4px 10px;border-radius:999px}.chip button{margin:0!important;width:18px!important;height:18px;padding:0!important;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;font-family:Arial,sans-serif;font-size:13px;line-height:18px}
+.card{width:720px;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.14);color:var(--ink)}.card.hidden,.mode{display:none}.mode.active{display:block}
+#titleBar{background:var(--ink);padding:26px 32px 24px;text-align:left;border-bottom:8px solid var(--yellow)}#titleBar [contenteditable]{font-family:'Arial Black',Arial,sans-serif;color:#fff;font-size:26px;line-height:1.2;outline:none}
+#lineBar{margin:22px 32px 0;background:var(--yellow);border-radius:14px;padding:14px 18px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px}#lineBar .label{font-family:'Arial Black',Arial,sans-serif;font-size:16px;white-space:nowrap}#lineBadges,#infoLineBadges{display:flex;flex-wrap:wrap;gap:8px}.badge{background:var(--ink);color:var(--yellow);font-family:'Arial Black',Arial,sans-serif;font-size:20px;line-height:1;min-width:46px;padding:9px 12px;border-radius:9px;text-align:center}#lineBar .network span{display:inline-block;background:#fff;border-radius:999px;padding:6px 14px;font-family:'Arial Black',Arial,sans-serif;font-size:13px;white-space:nowrap}
+#infoBlock{padding:20px 32px 8px;font-size:15px;line-height:1.5}#infoBlock .row{display:grid;grid-template-columns:78px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid #eceef2}#infoBlock .row:last-child{border-bottom:none}#infoBlock .k{font-family:'Arial Black',Arial,sans-serif;font-size:13px;padding-top:2px;border-left:4px solid var(--yellow);padding-left:8px}[contenteditable]{outline:none}[contenteditable]:hover{background:rgba(255,210,0,.18)}[contenteditable]:focus{background:rgba(255,210,0,.32)}
+#mapWrap{padding:4px 0 14px;display:none;text-align:center}#mapWrap img{max-width:100%;border-radius:12px;display:block;margin:auto;border:1px solid #e0e3e8}.section-wrap{padding:8px 32px 0}.box{border-radius:12px;padding:14px 18px;margin-bottom:12px}.box-title{font-family:'Arial Black',Arial,sans-serif;font-size:14px;margin-bottom:6px}.box-red{background:var(--red-soft);border-left:8px solid var(--red)}.box-red .box-title{color:var(--red)}.box-yellow{background:var(--yellow-soft);border-left:8px solid var(--yellow)}.box-full{background:var(--ink);text-align:center;padding:16px 20px}.box-full .box-title{color:#fff;font-size:14px;line-height:1.35;margin-bottom:6px}.box-full .small{color:var(--yellow);font-size:11px;font-weight:bold}.stops-list{font-size:14px;margin:0 0 6px;padding-left:18px}.note-small{font-size:11px;color:#666}.replacement-text{font-size:14px;line-height:1.5}.replacement-text b{text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:3px}
+#infoDescription{padding:20px 32px 8px}#infoDescriptionBox{background:var(--yellow-soft);border-left:8px solid var(--yellow);border-radius:12px;padding:18px 20px;font-size:15px;line-height:1.55;white-space:pre-line}#infoImages{padding:12px 32px 10px;display:none}.info-image{width:100%;max-height:500px;object-fit:contain;display:block;margin:0 auto 12px;border-radius:12px;border:1px solid #e0e3e8}#infoExtra{padding:8px 32px 12px}#infoExtraBox{background:var(--ink);color:#fff;border-radius:12px;padding:16px 20px;font-size:14px;line-height:1.5;white-space:pre-line}#infoExtraBox b{color:var(--yellow)}
+#contactBlock{padding:12px 32px 6px;font-size:13px;text-align:center}#contactBlock a{color:var(--ink);font-weight:bold;text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:3px}#logoBlock{padding:8px 32px 26px;text-align:center}#logoBlock img{max-height:60px;max-width:100%}#logoBlock .missing{font-size:12px;color:#999;font-style:italic}
+</style>
+</head>
+<body>
+<div id="navigation"><button type="button" class="nav-button active" id="navDeviation">Déviation</button><button type="button" class="nav-button" id="navInfo">Informations</button></div>
+<div id="panel">
+<div id="deviationPanel" class="mode active">
+<h2>⚙️ Générateur de déviation</h2>
+<label>Réseau de transport</label><select id="network"><option>LETEC</option><option>De Lijn</option><option>STIB</option><option>SNCB</option></select>
+<label>Lignes concernées</label><div class="add-row"><input type="text" id="lineInput" placeholder="Ex. 12 ou 12, 15, 21"><button type="button" id="addLineBtn">Ajouter</button></div><div id="lineChips"></div><div class="hint">Appuie sur Entrée pour ajouter. Clique sur × pour retirer une ligne.</div>
+<label>Format de la date "QUAND"</label><div class="radio-row"><label><input type="radio" name="dateMode" value="single" checked> À partir du…</label><label><input type="radio" name="dateMode" value="range"> Du … au …</label></div>
+<div class="date-single active" id="dateSingleWrap"><label>Date de début</label><input type="date" id="dateStart"></div>
+<div class="date-range" id="dateRangeWrap"><div style="flex:1"><label>Du</label><input type="date" id="dateFrom"></div><div style="flex:1"><label>Au</label><input type="date" id="dateTo"></div></div>
+<button type="button" id="applyDates" style="margin-top:12px;background:#242b33;color:#ffd200;">Appliquer les dates</button><hr>
+<label>Arrêts supprimés</label><textarea id="stopsRemoved" placeholder="Arrêt A&#10;Arrêt B"></textarea>
+<label>Arrêts de remplacement</label><textarea id="stopsReplacement" placeholder="Arrêt C&#10;Arrêt D"></textarea><hr>
+<label>Carte de déviation</label><input type="file" id="mapFile" accept="image/*"><div class="hint">Facultatif. L'image apparaîtra sur l'export.</div>
+<button type="button" id="removeMap" style="background:#999;color:#fff;display:none;">Retirer la carte</button><hr>
+<div class="hint">Le titre, le lieu et la cause sont modifiables directement dans l’aperçu.</div><button type="button" id="exportBtn">📥 Télécharger l'image (PNG)</button>
+</div>
+<div id="infoPanel" class="mode">
+<h2>⚙️ Générateur d'information</h2>
+<label>Réseau de transport</label><select id="infoNetwork"><option>LETEC</option><option>De Lijn</option><option>STIB</option><option>SNCB</option></select>
+<label>Lignes concernées</label><div class="add-row"><input type="text" id="infoLineInput" placeholder="Ex. 12 ou 12, 15, 21"><button type="button" id="infoAddLineBtn">Ajouter</button></div><div id="infoLineChips"></div><div class="hint">Vous pouvez laisser vide si toutes les lignes sont concernées.</div>
+<label>Format de la date</label><div class="radio-row"><label><input type="radio" name="infoDateMode" value="single" checked> Une date</label><label><input type="radio" name="infoDateMode" value="range"> Du … au …</label><label><input type="radio" name="infoDateMode" value="two"> Date et date</label></div>
+<div class="date-single active" id="infoDateSingleWrap"><label>Date</label><input type="date" id="infoDateSingle"></div>
+<div class="date-range" id="infoDateRangeWrap"><div style="flex:1"><label>Du</label><input type="date" id="infoDateFrom"></div><div style="flex:1"><label>Au</label><input type="date" id="infoDateTo"></div></div>
+<div class="date-two" id="infoDateTwoWrap"><div style="flex:1"><label>Date 1</label><input type="date" id="infoDateOne"></div><div style="flex:1"><label>Date 2</label><input type="date" id="infoDateTwo"></div></div>
+<button type="button" id="applyInfoDates" style="margin-top:12px;background:#242b33;color:#ffd200;">Appliquer les dates</button><hr>
+<label>Titre</label><input type="text" id="infoTitleInput" placeholder="Ex. Mouvement de grève">
+<label>Lieu</label><input type="text" id="infoPlaceInput" placeholder="Ex. Wallonie">
+<label>Informations</label><textarea id="infoDescriptionInput" placeholder="Écrivez ici les informations à communiquer..."></textarea>
+<label>Informations complémentaires</label><textarea id="infoExtraInput" placeholder="Ex. Consultez letec.be pour suivre l'évolution..."></textarea><hr>
+<label>Images</label><input type="file" id="infoImagesInput" accept="image/*" multiple><div class="hint">Vous pouvez sélectionner plusieurs images.</div>
+<button type="button" id="removeInfoImages" style="background:#999;color:#fff;display:none;">Retirer les images</button><hr>
+<button type="button" id="exportInfoBtn">📥 Télécharger l'information (PNG)</button>
+</div>
+</div>
+
+<div id="deviationCard" class="card">
+<div id="titleBar"><div contenteditable="true" id="titleText">TITRE DE L'INFORMATION</div></div>
+<div id="lineBar"><div class="label" id="ligneLabel">Ligne</div><div id="lineBadges"></div><div class="network"><span id="networkText">LETEC</span></div></div>
+<div id="infoBlock"><div class="row"><b class="k">OÙ</b><span contenteditable="true" id="ouText">nom du lieu</span></div><div class="row"><b class="k">CAUSE</b><span contenteditable="true" id="causeText">cause de la perturbation</span></div><div class="row"><b class="k">QUAND</b><span id="quandText">À partir du mercredi jour mois année.</span></div></div>
+<div class="section-wrap"><div class="box box-red" id="removedBox" style="display:none;"><div class="box-title">ARRÊT(S) SUPPRIMÉ(S)</div><ul class="stops-list" id="stopsRemovedList"></ul><div class="note-small">Ne sont plus desservis</div></div><div id="mapWrap"><img id="mapImg" src="" alt="Carte de déviation"></div><div class="box box-yellow" id="replacementBox" style="display:none;"><div class="box-title">ARRÊT(S) DE REMPLACEMENT</div><div class="replacement-text">Veuillez vous rendre à (aux) arrêt(s) <b id="stopsReplacementText"></b></div></div><div class="box box-full"><div class="box-title">TOUS LES ARRÊTS RENCONTRÉS SUR LE TRAJET DE DÉVIATION DOIVENT ÊTRE ASSURÉS</div><div class="small">SAUF AVIS CONTRAIRE & AVIS ARRÊTS SUPPRIMÉS</div></div></div>
+<div id="contactBlock"><span id="contactLink"><a href="https://www.letec.be/" target="_blank">letec.be</a></span>&nbsp;•&nbsp;<span id="contactPhone">078 05 31 00</span></div>
+<div id="logoBlock"><img id="logoImg" src="img/MOBI COULEUR.png" alt="Logo"><div class="missing" id="logoMissing" style="display:none;">Place ton logo « MOBI COULEUR.png » dans le dossier /img à côté de ce fichier HTML.</div></div>
+</div>
+
+<div id="infoCard" class="card hidden">
+<div id="titleBar"><div id="infoCardTitle" contenteditable="true">INFORMATION</div></div>
+<div id="lineBar"><div class="label" id="infoLigneLabel">Réseau</div><div id="infoLineBadges"></div><div class="network"><span id="infoNetworkText">LETEC</span></div></div>
+<div id="infoBlock"><div class="row"><b class="k">OÙ</b><span id="infoCardPlace" contenteditable="true">Belgique</span></div><div class="row"><b class="k">QUAND</b><span id="infoCardDate">Date de l'information.</span></div></div>
+<div id="infoDescription"><div id="infoDescriptionBox" contenteditable="true">Informations à communiquer.</div></div>
+<div id="infoImages"></div>
+<div id="infoExtra" style="display:none;"><div id="infoExtraBox" contenteditable="true"></div></div>
+<div id="contactBlock"><span id="infoContactLink"><a href="https://www.letec.be/" target="_blank">letec.be</a></span>&nbsp;•&nbsp;<span id="infoContactPhone">078 05 31 00</span></div>
+<div id="logoBlock"><img id="infoLogoImg" src="img/MOBI COULEUR.png" alt="Logo"><div class="missing" id="infoLogoMissing" style="display:none;">Place ton logo « MOBI COULEUR.png » dans le dossier /img à côté de ce fichier HTML.</div></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
